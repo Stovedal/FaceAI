@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -26,17 +27,24 @@ public class Main {
 
         int correctAnswers = 0;
         ArrayList<Answer> answersList = getAnswerList(answersScanner, 200);
-        ArrayList<Image> imageList = getImageList(scanner, 200);
-        for(int i = 0; i< imageList.size(); i++){
-            int ans = faceAI.perceiveImage(imageList.get(i));
-            boolean correct = answersList.get(i).check(ans, imageList.get(i).ID);
-            if(!correct){
-                faceAI.train(answersList.get(i).getMood(), imageList.get(i));
-            } else {
-                correctAnswers = correctAnswers + 1;
+        ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
+        System.out.println("IMAGELISTSIZE"+ imageList.size());
+        while(correctAnswers < 100){
+            correctAnswers = 0;
+            for(int i = 0; i< imageList.size(); i++){
+                int ans = faceAI.perceiveImage(imageList.get(i));
+                boolean correct = imageList.get(i).check(ans, imageList.get(i).ID);
+                if(!correct){
+                    faceAI.train(imageList.get(i).answer, imageList.get(i));
+                } else {
+                    correctAnswers = correctAnswers + 1;
+                }
             }
+            System.out.println("Nr of correctAnswers " + correctAnswers);
+            Collections.shuffle(imageList);
         }
-        System.out.println("Nr of correctAnswers " + new Double(correctAnswers)/200);
+
+        System.out.println(" YAY Nr of correctAnswers " + correctAnswers);
 
     }
 
@@ -69,7 +77,10 @@ public class Main {
         }
     }
 
-    public static Image readImage(Scanner scanner) {
+    public static Image readImage(Scanner scanner, Scanner answerScanner) {
+
+
+            Answer ans = new Answer(scanner.nextLine());
 
         double[][] image = new double[20][20];
         int id = 1;
@@ -84,14 +95,14 @@ public class Main {
             scanner.nextLine();
         } catch (Exception e) {
         }
-        return new Image(image, id);
+        return new Image(image, id, ans.getMood());
     }
 
-    public static ArrayList getImageList(Scanner scanner, int number){
+    public static ArrayList getImageList(Scanner scanner, int number, Scanner answerScanner){
         ArrayList imageList = new ArrayList();
         for (int i = 0; i < number; i++){
             if(scanner.hasNext()){
-                imageList.add(readImage(scanner));
+                imageList.add(readImage(scanner, answerScanner));
             }
         }
         return imageList;
