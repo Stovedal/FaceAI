@@ -12,9 +12,6 @@ public class Image {
         this.ID = id;
         this.answer = answer;
     }
-    public void addAns(Answer a){
-        this.answer = a.getMood();
-    }
 
     public boolean check(int perceivedMood, int ID){
         try {

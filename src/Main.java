@@ -15,20 +15,18 @@ public class Main {
 
     public static void main(String[] args ){
 
-        Scanner scanner= makeScanner("C:\\Users\\Linnea\\IdeaProjects\\FaceAI\\testImages\\training-A.txt");
+        String path = "C:\\Users\\Sofia\\FaceAI\\testImages\\";
 
-        Scanner answersScanner= makeScanner("C:\\Users\\Linnea\\IdeaProjects\\FaceAI\\testImages\\facit-A.txt");
+        Scanner scanner= makeScanner(path + "training-A.txt");
+
+        Scanner answersScanner= makeScanner(path + "facit-A.txt");
 
         PerceptronLayer faceAI = new PerceptronLayer();
 
-
         printComments(scanner);
         printComments(answersScanner);
-
         int correctAnswers = 0;
-        ArrayList<Answer> answersList = getAnswerList(answersScanner, 200);
         ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
-        System.out.println("IMAGELISTSIZE"+ imageList.size());
         while(correctAnswers < 100){
             correctAnswers = 0;
             for(int i = 0; i< imageList.size(); i++){
@@ -58,7 +56,7 @@ public class Main {
             FileReader fr = new FileReader(new File(path));
             return new Scanner(fr);
 
-        }catch (FileNotFoundException e){
+        } catch (FileNotFoundException e){
             System.out.println("File not found");
         }
         return null;
@@ -77,25 +75,25 @@ public class Main {
         }
     }
 
+
+
     public static Image readImage(Scanner scanner, Scanner answerScanner) {
 
-
-            Answer ans = new Answer(scanner.nextLine());
-
-        double[][] image = new double[20][20];
-        int id = 1;
+        double[][] data = new double[20][20];
+        String[] answerLine = answerScanner.nextLine().split(" ");
+        answerLine[0] = answerLine[0].replaceAll("\\D+","");
+        scanner.nextLine();
         try {
-            id = new Integer(scanner.nextLine().replaceAll("\\D+",""));
             for (int i = 0; i < 20; i++) {
                 for (int j = 0; j < 20; j++) {
-                    image[i][j] = (double)scanner.nextDouble()/32;
+                    data[i][j] = scanner.nextDouble()/32;
                 }
             }
             scanner.nextLine();
             scanner.nextLine();
         } catch (Exception e) {
         }
-        return new Image(image, id, ans.getMood());
+        return new Image(data, new Integer(answerLine[0]), new Integer(answerLine[1]));
     }
 
     public static ArrayList getImageList(Scanner scanner, int number, Scanner answerScanner){
