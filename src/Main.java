@@ -25,37 +25,42 @@ public class Main {
 
         printComments(scanner);
         printComments(answersScanner);
-        double correctAnswers = 0;
+        double nrOfCorrectAnswers = 0;
         ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
-        while(correctAnswers < 100){
-            correctAnswers = 0;
+        double best = 0;
+        while(nrOfCorrectAnswers < 100){
+            nrOfCorrectAnswers = 0;
             double count = 0;
             double ones = 0;
             double twos = 0;
             double threes = 0;
             for(int i = 0; i< imageList.size(); i++){
-                int ans = faceAI.perceiveImage(imageList.get(i));
-                boolean correct = imageList.get(i).check(ans);
-                if(ans == 4){
+                Image imageToPerceive = imageList.get(i);
+                int guess = faceAI.perceiveImage(imageToPerceive);
+                boolean isCorrect = imageToPerceive.check(guess);
+                if(guess == 4){
                     count++;
                 }
-                if(ans == 1){
+                if(guess == 1){
                     ones++;
                 }
-                if(ans == 2){
+                if(guess == 2){
                     twos++;
                 }
-                if(ans == 3){
+                if(guess == 3){
                     threes++;
                 }
-                if(!correct){
-                    faceAI.train(imageList.get(i).answer, imageList.get(i));
+                if(!isCorrect){
+                    faceAI.train(imageToPerceive);
                 } else {
-                    correctAnswers = correctAnswers + 1;
+                    nrOfCorrectAnswers = nrOfCorrectAnswers + 1;
                 }
             }
-            System.out.println("Nr of correctAnswers " + correctAnswers/200 + " fours " + count/200 + " ones " + ones/200 + " twos " + twos/200 + " threes " + threes/200);
-            System.out.println((count+ones+twos+threes));
+            if(Double.compare(nrOfCorrectAnswers, best)>0){
+                best = nrOfCorrectAnswers;
+            }
+
+            System.out.println("Nr of correct Answers " + nrOfCorrectAnswers/200);
 
             Collections.shuffle(imageList);
         }

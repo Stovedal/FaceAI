@@ -24,11 +24,11 @@ public class PerceptronLayer {
         for(int i = p.i - 1; i < p.i + 1; i++){
             for(int j = p.j - 1; j < p.j + 1; j++){
                 if(i > -1 && i < 20 && j > -1 && j < 20){
-
                     inputs[index] = image.data[i][j];
                 }
             }
         }
+
         return inputs;
     }
 
@@ -39,7 +39,7 @@ public class PerceptronLayer {
         int sad = 0;
         int mis = 0;
         int mad = 0;
-        double mood = 0;
+        double mood;
         for(int i = 0 ; i < 20 ; i++){
             for (int j = 0 ; j < 20 ; j++){
                 mood = perceptrons[i][j].guessMood(getInputsForPerceptron(perceptrons[i][j], image));
@@ -62,13 +62,13 @@ public class PerceptronLayer {
         if(mis >= sad && mis >= mad && mis >= happy){ return 3; }
         if(mad >= sad && mad >= happy && mad >= mis){ return 4; }
 
-        return 10;
+        return -1;
     }
 
-    public void train(int correctMood, Image image){
+    public void train(Image image){
         for(int i = 0 ; i < 20 ; i++){
             for (int j = 0 ; j < 20 ; j++){
-                perceptrons[i][j].adjustWeights(correctMood, getInputsForPerceptron(perceptrons[i][j], image));
+                perceptrons[i][j].adjustWeights(image.answer, getInputsForPerceptron(perceptrons[i][j], image));
             }
         }
     }

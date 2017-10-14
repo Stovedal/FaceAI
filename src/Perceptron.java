@@ -1,3 +1,5 @@
+import static java.lang.System.exit;
+
 /**
  * Created by Linnea on 2017-10-04.
  */
@@ -24,13 +26,12 @@ public class Perceptron {
     public int getNrOfInputs(int i, int j){
         int numberOfInputs = 0;
 
-        for(int x = i - 1; x < i + 1; x++){
-            for(int y = j - 1; y < j + 1; y++){
+        for(int x = i - 1; x < i + 2; x++){
+            for(int y = j - 1; y < j + 2; y++){
 
-                if(i > -1 && i < 20 && j > -1 && j < 20){
+                if(x > -1 && x < 20 && y > -1 && y < 20){
                     numberOfInputs++;
                 }
-
             }
         }
         return numberOfInputs;
@@ -39,7 +40,6 @@ public class Perceptron {
     public int guessMood(double[] inputs) {
 
         double sum = calcSum(inputs);
-
         return decideMood(sum);
 
     }
@@ -48,6 +48,15 @@ public class Perceptron {
         double sum = 0;
         for (int i = 0; i < nrOfInputs; i++) {
             sum += inputs[i] * weights[i];
+        }
+        if(Double.isNaN(sum)){
+            System.out.println("Number of inputs " + nrOfInputs + " for perceptron " + i + " " + j);
+            for (int i = 0; i < nrOfInputs; i++) {
+                sum += inputs[i] * weights[i];
+                System.out.println("input " + inputs[i]);
+                System.out.println("weight " + weights[i]);
+            }
+            throw new NumberFormatException("NaN found in calcsum");
         }
         return sum;
     }
@@ -77,10 +86,13 @@ public class Perceptron {
 
     public void adjustWeights(int correctMood, double[] inputs){
         double error = moodValues[correctMood-1] - calcSum(inputs);
+        double learningRate = 0.8;
+        double totDelta = learningRate*error*calcSum(inputs);
         for(int i = 0; i < nrOfInputs; i++){
-            double delta = 0.25*error*inputs[i];
+            double delta = learningRate*error*inputs[i];
             weights[i] = weights[i] + delta;
         }
+        moodValues[correctMood-1] = moodValues[correctMood-1] + totDelta;
     }
 
 }
