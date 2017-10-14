@@ -1,4 +1,3 @@
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -6,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * Created by Sofia on 2017-10-03.
@@ -28,42 +26,60 @@ public class Main {
         double nrOfCorrectAnswers = 0;
         ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
         double best = 0;
-        while(nrOfCorrectAnswers < 100){
+        double perceivedImages = 0;
+        double time = System.currentTimeMillis();
+        while(nrOfCorrectAnswers/200 < 0.65){
             nrOfCorrectAnswers = 0;
-            double count = 0;
-            double ones = 0;
-            double twos = 0;
-            double threes = 0;
             for(int i = 0; i< imageList.size(); i++){
                 Image imageToPerceive = imageList.get(i);
                 int guess = faceAI.perceiveImage(imageToPerceive);
                 boolean isCorrect = imageToPerceive.check(guess);
-                if(guess == 4){
-                    count++;
-                }
-                if(guess == 1){
-                    ones++;
-                }
-                if(guess == 2){
-                    twos++;
-                }
-                if(guess == 3){
-                    threes++;
-                }
                 if(!isCorrect){
                     faceAI.train(imageToPerceive);
                 } else {
                     nrOfCorrectAnswers = nrOfCorrectAnswers + 1;
                 }
             }
-            if(Double.compare(nrOfCorrectAnswers, best)>0){
+            if(Double.compare(nrOfCorrectAnswers, best+0.05)>0){
                 best = nrOfCorrectAnswers;
+                System.out.println(best/200);
             }
 
-            System.out.println("Nr of correct Answers " + nrOfCorrectAnswers/200);
+            perceivedImages = perceivedImages + imageList.size();
 
             Collections.shuffle(imageList);
         }
+        time = System.currentTimeMillis()-time;
+        System.out.println("Training complete with a success-rate of " + nrOfCorrectAnswers/2 +"% and " + perceivedImages + " images processed in " + time/1000 + " seconds");
+
+        System.out.println("Initalizing test");
+
+        Scanner testScanner= makeScanner(path + "test-B.txt");
+
+        Scanner testAnswersScanner= makeScanner(path + "facit-B.txt");
+        printComments(scanner);
+        printComments(answersScanner);
+        nrOfCorrectAnswers = 0;
+
+        time = System.currentTimeMillis();
+        ArrayList<Image> testImageList = getImageList(testScanner,100, testAnswersScanner);
+        for(int i = 0; i< testImageList.size(); i++){
+            Image imageToPerceive = testImageList.get(i);
+            int guess = faceAI.perceiveImage(imageToPerceive);
+            boolean isCorrect = imageToPerceive.check(guess);
+            if(!isCorrect){
+                faceAI.train(imageToPerceive);
+            } else {
+                nrOfCorrectAnswers = nrOfCorrectAnswers + 1;
+            }
+        }
+        time = System.currentTimeMillis()-time;
+
+        if(nrOfCorrectAnswers/100>0.65){
+        System.out.println("Test finished successfully with a success-rate of " + nrOfCorrectAnswers/2 + "% in " + time/1000 + " seconds");}
+
+
+
 
     }
 
@@ -89,10 +105,10 @@ public class Main {
      */
     public static void printComments(Scanner scanner){
         while (scanner.hasNext("#") && scanner.hasNext()) {
-            System.out.println(scanner.nextLine());
+            scanner.nextLine();
         }
         while(null==scanner.findInLine("I")){
-            System.out.println(scanner.nextLine());
+            scanner.nextLine();
         }
     }
 

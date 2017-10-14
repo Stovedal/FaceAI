@@ -1,3 +1,4 @@
+import static java.lang.System.err;
 import static java.lang.System.exit;
 
 /**
@@ -20,7 +21,6 @@ public class Perceptron {
         for(int index = 0; index < nrOfInputs; index ++){
             weights[index] = Math.random();
         }
-
     }
 
     public int getNrOfInputs(int i, int j){
@@ -86,13 +86,22 @@ public class Perceptron {
 
     public void adjustWeights(int correctMood, double[] inputs){
         double error = moodValues[correctMood-1] - calcSum(inputs);
-        double learningRate = 0.8;
-        double totDelta = learningRate*error*calcSum(inputs);
+        if(Double.isNaN(error) || Double.isInfinite(error)){
+            System.out.println("moodValues correct " + moodValues[correctMood-1] + " calcSum " + calcSum(inputs));
+            //throw new NumberFormatException("error is incorreft in adjustweights " + error);
+
+        }
+        double learningRate = 1;
         for(int i = 0; i < nrOfInputs; i++){
             double delta = learningRate*error*inputs[i];
+            if(Double.isNaN(delta)){
+                System.out.println("learningrate " + learningRate + " error " + error + " input " + inputs[i]);
+                //throw new NumberFormatException("Delta is Nan in adjustweights");
+            }
+
             weights[i] = weights[i] + delta;
         }
-        moodValues[correctMood-1] = moodValues[correctMood-1] + totDelta;
+        moodValues[correctMood-1] = moodValues[correctMood-1] - learningRate*error*calcSum(inputs);
     }
 
 }
