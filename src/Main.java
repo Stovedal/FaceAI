@@ -25,24 +25,40 @@ public class Main {
 
         printComments(scanner);
         printComments(answersScanner);
-        int correctAnswers = 0;
+        double correctAnswers = 0;
         ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
         while(correctAnswers < 100){
             correctAnswers = 0;
+            double count = 0;
+            double ones = 0;
+            double twos = 0;
+            double threes = 0;
             for(int i = 0; i< imageList.size(); i++){
                 int ans = faceAI.perceiveImage(imageList.get(i));
-                boolean correct = imageList.get(i).check(ans, imageList.get(i).ID);
+                boolean correct = imageList.get(i).check(ans);
+                if(ans == 4){
+                    count++;
+                }
+                if(ans == 1){
+                    ones++;
+                }
+                if(ans == 2){
+                    twos++;
+                }
+                if(ans == 3){
+                    threes++;
+                }
                 if(!correct){
                     faceAI.train(imageList.get(i).answer, imageList.get(i));
                 } else {
                     correctAnswers = correctAnswers + 1;
                 }
             }
-            System.out.println("Nr of correctAnswers " + correctAnswers);
+            System.out.println("Nr of correctAnswers " + correctAnswers/200 + " fours " + count/200 + " ones " + ones/200 + " twos " + twos/200 + " threes " + threes/200);
+            System.out.println((count+ones+twos+threes));
+
             Collections.shuffle(imageList);
         }
-
-        System.out.println(" YAY Nr of correctAnswers " + correctAnswers);
 
     }
 

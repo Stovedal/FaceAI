@@ -35,28 +35,43 @@ public class PerceptronLayer {
 
     public int perceiveImage(Image image){
 
-        double averageMood = 0;
+        int happy = 0;
+        int sad = 0;
+        int mis = 0;
+        int mad = 0;
+        double mood = 0;
         for(int i = 0 ; i < 20 ; i++){
             for (int j = 0 ; j < 20 ; j++){
-                averageMood = perceptrons[i][j].guessMood(getInputsForPerceptron(perceptrons[i][j], image)) + averageMood;
-                //System.out.println("hej" + perceptrons[i][j].guessMood(getInputsForPerceptron(perceptrons[i][j], image)));
+                mood = perceptrons[i][j].guessMood(getInputsForPerceptron(perceptrons[i][j], image));
+                if(mood == 1){
+                    happy++;
+                }
+                if( mood == 2){
+                    sad++;
+                }
+                if( mood == 3 ) {
+                    mis++;
+                }
+                if( mood == 4 ) {
+                    mad++;
+                }
             }
         }
-        return new Integer((int)Math.round(averageMood/400));
+        if(happy >= sad && happy >= mad && happy >= mis){ return 1; }
+        if(sad >= happy && sad >= mad && sad >= mis){ return 2; }
+        if(mis >= sad && mis >= mad && mis >= happy){ return 3; }
+        if(mad >= sad && mad >= happy && mad >= mis){ return 4; }
 
+        return 10;
     }
 
     public void train(int correctMood, Image image){
         for(int i = 0 ; i < 20 ; i++){
             for (int j = 0 ; j < 20 ; j++){
-                perceptrons[i][j].adjustWeights(correctMood-1, getInputsForPerceptron(perceptrons[i][j], image));
+                perceptrons[i][j].adjustWeights(correctMood, getInputsForPerceptron(perceptrons[i][j], image));
             }
         }
     }
-
-
-
-
 
 
 }

@@ -13,20 +13,7 @@ public class Image {
         this.answer = answer;
     }
 
-    public boolean check(int perceivedMood, int ID){
-        try {
-            if (ID == this.ID) {
-                if (perceivedMood == answer) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                throw new Exception("Incorrect image ID");
-            }
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-        return false;
+    public boolean check(int perceivedMood){
+        return perceivedMood == answer;
     }
 }
