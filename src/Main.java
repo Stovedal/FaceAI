@@ -5,78 +5,93 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * Created by Sofia on 2017-10-03.
  */
 public class Main {
 
-    public static void main(String[] args ){
+    public static void main(String[] args ) throws Exception {
 
+        //Create lists and Ai
         String path = "/Users/sofiatovedal/IdeaProjects/FaceAI/testImages/";
+        PrintWriter writer = new PrintWriter("answers.txt");
+        Brain brain = new Brain();
+        Scanner scanner= makeScanner(path + "train.txt");
+        Scanner correctMoodsScanner= makeScanner(path + "facit.txt");
+        Scanner testScanner = makeScanner(path + "test.txt");
+        ArrayList<Image> trainingList = getImageList(scanner, correctMoodsScanner);
+        ArrayList<Image> testList = getImageList(testScanner);
+        ArrayList<Image> performanceTestList = new ArrayList<>();
 
-        Scanner scanner= makeScanner(path + "training-A.txt");
-
-        Scanner answersScanner= makeScanner(path + "facit-A.txt");
-
-        PrintWriter writer = new PrintWriter("testAnswer.txt");
-        Brain faceAI = new Brain();
-
-        printComments(scanner);
-        printComments(answersScanner);
-        double nrOfCorrectAnswers = 0;
-        ArrayList<Image> imageList = getImageList(scanner, 200, answersScanner);
-        double best = 0;
-        double perceivedImages = 0;
-        double time = System.currentTimeMillis();
-        int c = 0;
-        while(c<300){
-            c++;
-            nrOfCorrectAnswers = 0;
-
-            for(int i = 0; i< imageList.size(); i++){
-                Image imageToPerceive = imageList.get(i);
-                boolean isCorrect = faceAI.train(imageToPerceive);
-                if(isCorrect){
-                    nrOfCorrectAnswers++;
-                }
-            }
-            System.out.println( nrOfCorrectAnswers / 200 );
-
-            if(Double.compare(nrOfCorrectAnswers, best+0.05)>0){
-                best = nrOfCorrectAnswers;
-                System.out.println(best/200);
-            }
-
-            perceivedImages = perceivedImages + imageList.size();
-
-            Collections.shuffle(imageList);
+        //Split the trainingList into training and performanceTesting lists
+        //(ratio 70:30)
+        double sizeOfTrainingSet = trainingList.size();
+        for(int i = 0; i < (int)Math.round(sizeOfTrainingSet/3) ; i++ ){
+            performanceTestList.add(trainingList.remove(i));
         }
 
-        Scanner scannerTest = makeScanner(path + "test-B.txt");
-
-        Scanner answersScannerTest = makeScanner(path + "facit-B.txt");
-
-        printComments(scannerTest);
-        printComments(answersScannerTest);
-
-        ArrayList<Image> testList = getImageList(scannerTest, 100, answersScannerTest);
-
-        nrOfCorrectAnswers = 0;
-        for(int i = 0; i < testList.size(); i++){
-            writer.println(faceAI.test(testList.get(i)));
+        //Train until achieving 70% accuracy
+        double accuracy = 0;
+        while(Double.compare(accuracy, 0.7)<0){
+            train(trainingList, brain);
+            accuracy = testPerformance(performanceTestList, brain);
         }
-        time = System.currentTimeMillis()-time;
-        System.out.println("Test complete with a success-rate of " + nrOfCorrectAnswers/100);
+
+        //Perform
+        performFaceRecognition(testList, brain, writer);
+
+    }
+
+    /**
+     * Makes ai perceive all images of given list and write its id and guessed mood to a file
+     * using given PrintWriter.
+     * @param imageList ArrayList
+     * @param brain Brain
+     * @param writer PrintWriter
+     */
+    private static void performFaceRecognition( ArrayList<Image> imageList, Brain brain, PrintWriter writer ){
+        for(int i = 0; i < imageList.size(); i++){
+            writer.println(brain.test(imageList.get(i)));
+        }
+        writer.close();
+    }
+
+    /**
+     * Trains on given imageList once;
+     * @param imageList ArrayList
+     * @param brain Brain
+     */
+    private static void train( ArrayList<Image> imageList , Brain brain){
+        for(int i = 0; i<imageList.size(); i++){
+            brain.train(imageList.get(i));
+        }
+        Collections.shuffle(imageList);
+    }
+
+    /**
+     * Tests the performace of the ai on a imageList and returns percentage of correctness
+     * (0-1)
+     * @param imageList ArrayList
+     * @param brain Brain
+     * @return double
+     */
+    private static double testPerformance(ArrayList<Image> imageList, Brain brain){
+        double nrOfCorrectAns = 0;
+        for(int i = 0; i < imageList.size(); i++){
+            if(brain.testTraining(imageList.get(i))){
+                nrOfCorrectAns++;
+            }
+        }
+        return nrOfCorrectAns/imageList.size();
     }
 
     /**
      * Makes a Filereader, reads the file and returns a scanner.
-     * @param path
+     * @param path String
      * @return scanner
      */
-    public static Scanner makeScanner(String path){
+    private static Scanner makeScanner(String path){
         try{
             FileReader fr = new FileReader(new File(path));
             return new Scanner(fr);
@@ -88,10 +103,11 @@ public class Main {
     }
 
     /**
-     *
-     * @param scanner
+     * Method intended to skip the top-most comments of standard
+     * image and facit-files if there are any.
+     * @param scanner Scanner
      */
-    public static void printComments(Scanner scanner){
+    private static void skipComments(Scanner scanner){
         while (scanner.hasNext("#") && scanner.hasNext()) {
             scanner.nextLine();
         }
@@ -101,49 +117,78 @@ public class Main {
 
     }
 
-    public static Image readImage(Scanner scanner, Scanner answerScanner) {
-
+    /**
+     * Reads and Image and and answer from scanners into an Image
+     * object and returns it
+     * @param scanner Scanner
+     * @param answerScanner Scanner
+     * @return Image
+     */
+    private static Image readImage(Scanner scanner, Scanner answerScanner) {
         double[][] data = new double[20][20];
         String[] answerLine = answerScanner.nextLine().split(" ");
+
         answerLine[0] = answerLine[0].replaceAll("\\D+","");
-        scanner.nextLine();
-        try {
-            for (int i = 0; i < 20; i++) {
-                for (int j = 0; j < 20; j++) {
-                    data[i][j] = new Double(scanner.next())/32;
-                }
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 20; j++) {
+                data[i][j] = new Double(scanner.next())/32;
             }
-            scanner.nextLine();
-            scanner.nextLine();
-        } catch (Exception e) {
         }
+        scanner.nextLine();
+        scanner.nextLine();
         return new Image(data, new Integer(answerLine[0]), new Integer(answerLine[1]));
     }
 
-    public static Image readImage(Scanner scanner) {
+    /**
+     * Reads and Image from scanner into an Image
+     * object and returns it
+     * @param scanner Scanner
+     * @return Image
+     */
+    private static Image readImage(Scanner scanner) {
 
         double[][] data = new double[20][20];
         String[] id = scanner.nextLine().split(" ");
         id[0] = id[0].replaceAll("\\D+","");
-        try {
-            for (int i = 0; i < 20; i++) {
-                for (int j = 0; j < 20; j++) {
-                    data[i][j] = new Double(scanner.next())/32;
-                }
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 20; j++) {
+                data[i][j] = new Double(scanner.next())/32;
             }
-            scanner.nextLine();
-            scanner.nextLine();
-        } catch (Exception e) {
         }
+        scanner.nextLine();
+        scanner.nextLine();
         return new Image(data, new Integer(id[0]));
     }
 
-    public static ArrayList getImageList(Scanner scanner, int number, Scanner answerScanner){
-        ArrayList imageList = new ArrayList();
-        for (int i = 0; i < number; i++){
-            if(scanner.hasNext()){
-                imageList.add(readImage(scanner, answerScanner));
-            }
+
+    /**
+     * Creates a list of image-objects containing images and 
+     * moods when given a scanner for images and one for moods.
+     * @param scanner Scanner
+     * @param correctMoodScanner Scanner
+     * @return ArrayList
+     */
+    private static ArrayList<Image> getImageList(Scanner scanner, Scanner correctMoodScanner){
+        skipComments(scanner);
+        skipComments(correctMoodScanner);
+        ArrayList<Image> imageList = new ArrayList<>();
+        while (null!=scanner.findInLine("mage")){
+            imageList.add(readImage(scanner, correctMoodScanner));
+        }
+        return imageList;
+    }
+
+    /**
+     * Creates a list of image-objects containing images when
+     * given a scanner for images.
+     * @param scanner Scanner
+     * @return ArrayList
+     */
+    private static ArrayList<Image> getImageList(Scanner scanner){
+        skipComments(scanner);
+        ArrayList<Image> imageList = new ArrayList<>();
+        while (null!=scanner.findInLine("mage")){
+            imageList.add(readImage(scanner));
         }
         return imageList;
     }
