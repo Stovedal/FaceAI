@@ -42,23 +42,12 @@ public class Brain {
         double mis = mischeiviousPerceptrons.guessMood(image);
         double mad = madPerceptrons.guessMood(image);
 
-        int answer = getMood(happy, sad, mis, mad);
+        happyPerceptrons.adjustWeights(computeError(image.answer == 1, happy), image);
+        sadPerceptrons.adjustWeights(computeError(image.answer == 2, sad), image);
+        mischeiviousPerceptrons.adjustWeights(computeError(image.answer == 3, mis), image);
+        madPerceptrons.adjustWeights(computeError(image.answer == 4, mad), image);
 
-        if (answer == image.answer){
-            happyPerceptrons.adjustWeights(computeError(image.answer == 1, happy), image);
-            sadPerceptrons.adjustWeights(computeError(image.answer == 2, sad), image);
-            mischeiviousPerceptrons.adjustWeights(computeError(image.answer == 3, mis), image);
-            madPerceptrons.adjustWeights(computeError(image.answer == 4, mad), image);
-            return true;
-        }
-        else{
-            happyPerceptrons.adjustWeights(computeError(image.answer == 1, happy), image);
-            sadPerceptrons.adjustWeights(computeError(image.answer == 2, sad), image);
-            mischeiviousPerceptrons.adjustWeights(computeError(image.answer == 3, mis), image);
-            madPerceptrons.adjustWeights(computeError(image.answer == 4, mad), image);
-        }
-
-        return false;
+        return getMood(happy, sad, mis, mad) == image.answer;
 
     }
 

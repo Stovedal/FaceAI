@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -13,12 +14,13 @@ public class Main {
 
     public static void main(String[] args ){
 
-        String path = "C:\\Users\\Linnea\\IdeaProjects\\FaceAI\\testImages\\";
+        String path = "/Users/sofiatovedal/IdeaProjects/FaceAI/testImages/";
 
         Scanner scanner= makeScanner(path + "training-A.txt");
 
         Scanner answersScanner= makeScanner(path + "facit-A.txt");
 
+        PrintWriter writer = new PrintWriter("testAnswer.txt");
         Brain faceAI = new Brain();
 
         printComments(scanner);
@@ -63,11 +65,8 @@ public class Main {
 
         nrOfCorrectAnswers = 0;
         for(int i = 0; i < testList.size(); i++){
-            if(faceAI.test(testList.get(i))){
-                nrOfCorrectAnswers++;
-            }
+            writer.println(faceAI.test(testList.get(i)));
         }
-
         time = System.currentTimeMillis()-time;
         System.out.println("Test complete with a success-rate of " + nrOfCorrectAnswers/100);
     }
@@ -108,11 +107,10 @@ public class Main {
         String[] answerLine = answerScanner.nextLine().split(" ");
         answerLine[0] = answerLine[0].replaceAll("\\D+","");
         scanner.nextLine();
-
         try {
             for (int i = 0; i < 20; i++) {
                 for (int j = 0; j < 20; j++) {
-                    data[i][j] = scanner.nextDouble()/32;
+                    data[i][j] = new Double(scanner.next())/32;
                 }
             }
             scanner.nextLine();
@@ -120,6 +118,24 @@ public class Main {
         } catch (Exception e) {
         }
         return new Image(data, new Integer(answerLine[0]), new Integer(answerLine[1]));
+    }
+
+    public static Image readImage(Scanner scanner) {
+
+        double[][] data = new double[20][20];
+        String[] id = scanner.nextLine().split(" ");
+        id[0] = id[0].replaceAll("\\D+","");
+        try {
+            for (int i = 0; i < 20; i++) {
+                for (int j = 0; j < 20; j++) {
+                    data[i][j] = new Double(scanner.next())/32;
+                }
+            }
+            scanner.nextLine();
+            scanner.nextLine();
+        } catch (Exception e) {
+        }
+        return new Image(data, new Integer(id[0]));
     }
 
     public static ArrayList getImageList(Scanner scanner, int number, Scanner answerScanner){

@@ -13,6 +13,11 @@ public class Image {
         this.answer = answer;
     }
 
+    public Image(double[][] data, int id){
+        this.data = data;
+        this.ID = id;
+    }
+
     public boolean check(int perceivedMood){
         return perceivedMood == answer;
     }
