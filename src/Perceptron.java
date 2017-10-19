@@ -58,7 +58,5 @@ public class Perceptron {
                 weights[i][j] = weights[i][j] + delta;
             }
         }
-
     }
-
 }

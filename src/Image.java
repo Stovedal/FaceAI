@@ -29,5 +29,4 @@ public class Image {
         this.data = data;
         this.ID = id;
     }
-
 }

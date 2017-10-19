@@ -9,7 +9,6 @@ public class Brain {
     private Perceptron sadPerceptrons;
     private Perceptron mischeiviousPerceptrons;
     private Perceptron madPerceptrons;
-    public double nrOfTestCorrects = 0;
 
     /**
      * A Brain holds 4 perceptrons for each of the moods happy,
@@ -17,7 +16,6 @@ public class Brain {
      * detect these moods to a degree.
      */
     public Brain(){
-
         happyPerceptrons = new Perceptron();
         sadPerceptrons = new Perceptron();
         mischeiviousPerceptrons = new Perceptron();
@@ -25,13 +23,10 @@ public class Brain {
     }
 
     /**
-     * Trains the ai on the given image an returns a boolean,
-     * true if the ai guessed correctly, false if not
+     * Trains the ai on the given image.
      * @param image Image
-     * @return boolean
      */
-    public boolean train(Image image){
-
+    public void train(Image image){
         double happy = happyPerceptrons.guessMood(image);
         double sad = sadPerceptrons.guessMood(image);
         double mis = mischeiviousPerceptrons.guessMood(image);
@@ -41,9 +36,6 @@ public class Brain {
         sadPerceptrons.adjustWeights(computeError(image.answer == 2, sad), image);
         mischeiviousPerceptrons.adjustWeights(computeError(image.answer == 3, mis), image);
         madPerceptrons.adjustWeights(computeError(image.answer == 4, mad), image);
-
-        return getMood(happy, sad, mis, mad) == image.answer;
-
     }
 
 
@@ -57,9 +49,8 @@ public class Brain {
         double sad = sadPerceptrons.guessMood(image);
         double mis = mischeiviousPerceptrons.guessMood(image);
         double mad = madPerceptrons.guessMood(image);
-        int answer = getMood(happy, sad, mis, mad);
-        if(answer==image.answer){nrOfTestCorrects++;}
-        return new String("Image" + image.ID + " " + answer);
+        System.out.println("Image" + image.ID + " " + getMood(happy, sad, mis, mad));
+        return "Image" + image.ID + " " + getMood(happy, sad, mis, mad);
     }
 
     /**
@@ -67,13 +58,12 @@ public class Brain {
      * @param image Image
      * @return String
      */
-    public boolean testTraining(Image image){
+    public boolean testPerformance(Image image){
         double happy = happyPerceptrons.guessMood(image);
         double sad = sadPerceptrons.guessMood(image);
         double mis = mischeiviousPerceptrons.guessMood(image);
         double mad = madPerceptrons.guessMood(image);
-        int answer = getMood(happy, sad, mis, mad);
-        return answer==image.answer;
+        return getMood(happy, sad, mis, mad)==image.answer;
     }
 
     /**

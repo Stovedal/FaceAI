@@ -78,7 +78,7 @@ public class Faces {
     private static double testPerformance(ArrayList<Image> imageList, Brain brain){
         double nrOfCorrectAns = 0;
         for(int i = 0; i < imageList.size(); i++){
-            if(brain.testTraining(imageList.get(i))){
+            if(brain.testPerformance(imageList.get(i))){
                 nrOfCorrectAns++;
             }
         }
