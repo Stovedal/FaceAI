@@ -9,17 +9,16 @@ import java.util.Scanner;
 /**
  * Created by Sofia on 2017-10-03.
  */
-public class Main {
+public class FaceAI {
 
     public static void main(String[] args ) throws Exception {
 
-        //Create lists and Ai
-        String path = "/Users/sofiatovedal/IdeaProjects/FaceAI/testImages/";
+        //Create image-lists and Ai
         PrintWriter writer = new PrintWriter("answers.txt");
         Brain brain = new Brain();
-        Scanner scanner= makeScanner(path + "train.txt");
-        Scanner correctMoodsScanner= makeScanner(path + "facit.txt");
-        Scanner testScanner = makeScanner(path + "test.txt");
+        Scanner scanner= makeScanner(args[0]);
+        Scanner correctMoodsScanner= makeScanner(args[1]);
+        Scanner testScanner = makeScanner(args[2]);
         ArrayList<Image> trainingList = getImageList(scanner, correctMoodsScanner);
         ArrayList<Image> testList = getImageList(testScanner);
         ArrayList<Image> performanceTestList = new ArrayList<>();
