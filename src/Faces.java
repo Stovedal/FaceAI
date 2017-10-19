@@ -9,12 +9,12 @@ import java.util.Scanner;
 /**
  * Created by Sofia on 2017-10-03.
  */
-public class FaceAI {
+public class Faces {
 
     public static void main(String[] args ) throws Exception {
 
         //Create image-lists and Ai
-        PrintWriter writer = new PrintWriter("answers.txt");
+        PrintWriter writer = new PrintWriter("result.txt");
         Brain brain = new Brain();
         Scanner scanner= makeScanner(args[0]);
         Scanner correctMoodsScanner= makeScanner(args[1]);

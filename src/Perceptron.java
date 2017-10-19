@@ -16,7 +16,6 @@ public class Perceptron {
                 weights[i][j] = Math.random();
             }
         }
-
     }
 
     /**
@@ -39,8 +38,8 @@ public class Perceptron {
     /**
      * Using the sigmoid-function, calculates the activation
      * of the perceptron.
-     * @param sum
-     * @return
+     * @param sum double
+     * @return double
      */
     private double activationFunction (double sum) {
         return (1/( 1 + Math.pow(Math.E,(-1*sum))));
