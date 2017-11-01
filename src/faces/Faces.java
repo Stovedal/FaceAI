@@ -14,31 +14,33 @@ public class Faces {
     public static void main(String[] args ) throws Exception {
 
         //Create image-lists and Ai
+        PrintWriter writer = new PrintWriter("result.txt");
         Brain brain = new Brain();
         Scanner scanner= makeScanner( args[0]);
         Scanner correctMoodsScanner= makeScanner(args[1]);
         Scanner testScanner = makeScanner(args[2]);
-        Scanner testAnsScanner = makeScanner(args[3]);
 
         ArrayList<Image> trainingList = getImageList(scanner, correctMoodsScanner);
-        ArrayList<Image> testList = getImageList(testScanner, testAnsScanner);
+        ArrayList<Image> testList = getImageList(testScanner);
         ArrayList<Image> performanceTestList = new ArrayList<>();
 
         //Split the trainingList into training and performanceTesting lists
         //(ratio 70:30)
         double sizeOfTrainingSet = trainingList.size();
         for(int i = 0; i < (int)Math.round(sizeOfTrainingSet/3) ; i++ ){
-            performanceTestList.add(trainingList.remove(0));
+            performanceTestList.add(trainingList.remove(i));
         }
 
-        //Train 300 times
-        for(int i = 0; i<300; i++){
+        //Train until achieving 75% accuracy
+        double accuracy = 0;
+        while(Double.compare(accuracy, 0.75)<0){
             train(trainingList, brain);
             Collections.shuffle(trainingList);
-            testPerformance(performanceTestList, brain);
+            accuracy = testPerformance(performanceTestList, brain);
         }
+
         //Perform
-        performFaceRecognition(testList, brain);
+        performFaceRecognition(testList, brain, writer);
     }
 
     /**
@@ -46,11 +48,13 @@ public class Faces {
      * using given PrintWriter.
      * @param imageList ArrayList
      * @param brain Brain
+     * @param writer PrintWriter
      */
-    private static void performFaceRecognition( ArrayList<Image> imageList, Brain brain ){
+    private static void performFaceRecognition( ArrayList<Image> imageList, Brain brain, PrintWriter writer ){
         for(int i = 0; i < imageList.size(); i++){
-           brain.test(imageList.get(i));
+            writer.println(brain.test(imageList.get(i)));
         }
+        writer.close();
     }
 
     /**

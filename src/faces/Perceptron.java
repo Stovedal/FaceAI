@@ -61,7 +61,7 @@ public class Perceptron {
     }
 
     /**
-     * Limits a weight to the scope of -limit : limit
+     * Limits a weight to the scope of -0.75 : 0.75
      * @param weight double
      * @return double
      */

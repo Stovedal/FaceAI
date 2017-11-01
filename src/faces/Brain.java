@@ -41,12 +41,13 @@ public class Brain {
      * @param image Image
      * @return String
      */
-    public void test(Image image){
+    public String test(Image image){
         double happy = happyPerceptron.guessMood(image);
         double sad = sadPerceptron.guessMood(image);
         double mis = mischeiviousPerceptron.guessMood(image);
         double mad = madPerceptron.guessMood(image);
         System.out.println("Image" + image.ID + " " + getMood(happy, sad, mis, mad));
+        return "Image" + image.ID + " " + getMood(happy, sad, mis, mad);
     }
 
     /**

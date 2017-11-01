@@ -5,7 +5,7 @@ public class Image {
 
     public double[][] data;
     public int ID;
-    public int answer;
+    public int answer = 0;
 
     /**
      * Image object containing 20*20 pixels and
